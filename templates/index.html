@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revisor de Cadenas</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="marca">
+    <span class="logo">AFD</span>
+    <div>
+      <h1>Revisor de Cadenas</h1>
+      <p>Proyecto 1 &middot; Autómatas y Lenguajes Formales &middot; UMG Chimaltenango</p>
+    </div>
+  </div>
+  <div class="indicador" id="indicadorEstado">
+    <span class="punto"></span><span id="textoEstado">Esperando archivos</span>
+  </div>
+</header>
+
+<main class="contenido">
+
+  <!-- ============ PASO 1: CARGA DE ARCHIVOS ============ -->
+  <section class="tarjeta" id="seccionCarga">
+    <div class="tituloSeccion">
+      <span class="numeroPaso">1</span>
+      <h2>Lectura de archivos de entrada</h2>
+    </div>
+
+    <div class="rejillaCarga">
+      <div class="zonaSoltar" id="zonaEntrada" data-destino="entrada">
+        <input type="file" id="archivoEntrada" accept=".txt,text/plain" hidden>
+        <div class="iconoZona">&#128196;</div>
+        <h3>Entrada.txt</h3>
+        <p class="ayudaZona">Una cadena por línea</p>
+        <button class="botonZona" type="button" data-abrir="archivoEntrada">
+          Seleccionar archivo
+        </button>
+        <div class="infoArchivo" id="infoEntrada"></div>
+      </div>
+
+      <div class="zonaSoltar" id="zonaExpresion" data-destino="expresiones">
+        <input type="file" id="archivoExpresion" accept=".txt,text/plain" hidden>
+        <div class="iconoZona">&#9881;</div>
+        <h3>Expresion.txt</h3>
+        <p class="ayudaZona">NOMBRE = "patrón"</p>
+        <button class="botonZona" type="button" data-abrir="archivoExpresion">
+          Seleccionar archivo
+        </button>
+        <div class="infoArchivo" id="infoExpresion"></div>
+      </div>
+    </div>
+
+    <div class="filaAcciones">
+      <button class="boton secundario" id="btnEjemplos" type="button">
+        Cargar archivos de ejemplo
+      </button>
+      <button class="boton principal" id="btnProcesar" type="button" disabled>
+        Analizar y construir autómatas
+      </button>
+    </div>
+
+    <div class="aviso oculto" id="cajaError"></div>
+  </section>
+
+  <!-- ============ PASO 2: AUTÓMATAS CONSTRUIDOS ============ -->
+  <section class="tarjeta oculto" id="seccionAutomatas">
+    <div class="tituloSeccion">
+      <span class="numeroPaso">2</span>
+      <h2>Autómatas construidos</h2>
+    </div>
+    <p class="notaSeccion">
+      Cada expresión regular se convirtió en un AFN por el método de Thompson
+      y luego en un AFD por construcción de subconjuntos.
+    </p>
+    <div class="listaAutomatas" id="listaAutomatas"></div>
+  </section>
+
+  <!-- ============ PASO 3: SIMULACIÓN ============ -->
+  <section class="tarjeta oculto" id="seccionSimulacion">
+    <div class="tituloSeccion">
+      <span class="numeroPaso">3</span>
+      <h2>Clasificación de cadenas</h2>
+    </div>
+
+    <div class="panelControl">
+      <div class="grupoBotones">
+        <button class="boton principal" id="btnIniciar" type="button">
+          &#9654; Iniciar
+        </button>
+        <button class="boton secundario" id="btnPausar" type="button" disabled>
+          &#10073;&#10073; Pausar
+        </button>
+        <button class="boton secundario" id="btnPaso" type="button">
+          &#8677; Un paso
+        </button>
+        <button class="boton secundario" id="btnFinal" type="button">
+          &#8677;&#8677; Saltar al final
+        </button>
+        <button class="boton fantasma" id="btnReiniciar" type="button">
+          &#8634; Reiniciar
+        </button>
+      </div>
+
+      <div class="controlVelocidad">
+        <label for="velocidad">
+          Velocidad: <strong><span id="valorVelocidad">2.0</span> s</strong> por paso
+        </label>
+        <input type="range" id="velocidad" min="0.2" max="5" step="0.1" value="2">
+        <div class="marcasVelocidad"><span>0.2 s</span><span>5 s</span></div>
+      </div>
+    </div>
+
+    <div class="barraProgreso">
+      <div class="relleno" id="rellenoProgreso"></div>
+    </div>
+    <div class="textoProgreso" id="textoProgreso">Listo para iniciar</div>
+
+    <!-- Cinta de la cadena -->
+    <div class="escenario">
+      <div class="encabezadoEscenario">
+        <div>
+          <span class="etiquetaTenue">Cadena</span>
+          <span class="cadenaActual" id="cadenaActual">&mdash;</span>
+        </div>
+        <div class="derecha">
+          <span class="etiquetaTenue">Evaluando contra</span>
+          <span class="expresionActual" id="expresionActual">&mdash;</span>
+        </div>
+      </div>
+
+      <div class="cinta" id="cinta"></div>
+
+      <div class="panelEstado">
+        <div class="burbujaEstado" id="estadoAnterior">q0</div>
+        <div class="flechaTransicion">
+          <span class="simboloTransicion" id="simboloTransicion">&mdash;</span>
+          <span class="lineaFlecha">&#10230;</span>
+          <span class="claseTransicion" id="claseTransicion"></span>
+        </div>
+        <div class="burbujaEstado activa" id="estadoActual">q0</div>
+      </div>
+
+      <div class="veredicto" id="veredicto"></div>
+    </div>
+
+    <!-- Bitácora -->
+    <div class="bitacora">
+      <h3>Bitácora del proceso</h3>
+      <div class="listaBitacora" id="listaBitacora"></div>
+    </div>
+  </section>
+
+  <!-- ============ PASO 4: RESULTADOS ============ -->
+  <section class="tarjeta oculto" id="seccionResultado">
+    <div class="tituloSeccion">
+      <span class="numeroPaso">4</span>
+      <h2>Reporte: Salida.txt</h2>
+    </div>
+
+    <div class="rejillaMetricas" id="rejillaMetricas"></div>
+
+    <h3 class="subtitulo">Resumen del proceso</h3>
+    <div class="rejillaCategorias" id="rejillaCategorias"></div>
+
+    <h3 class="subtitulo">Contenido de Salida.txt</h3>
+    <div class="rutaSalida" id="rutaSalida"></div>
+    <pre class="archivoSalida" id="archivoSalida"></pre>
+
+    <div class="filaAcciones">
+      <button class="boton principal" id="btnDescargar" type="button">
+        Descargar Salida.txt
+      </button>
+      <button class="boton secundario" id="btnCopiar" type="button">
+        Copiar al portapapeles
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="pie">
+  Servidor local &middot; 127.0.0.1:5000 &middot; Los archivos no salen de esta computadora
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+Salida.txt
+Proyecto 1 Expresiones Regulares.md

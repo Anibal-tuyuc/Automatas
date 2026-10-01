@@ -1,0 +1,4 @@
+FECHA_CORTA_NUMEROS = "\d{1,2}/\d{1,2}/\d{4}"
+FECHA_MES_LETRAS = "\d{1,2}[/-](?i)(ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)[/-]\d{4}"
+CADENA_MAYUSCULAS = "[A-Z]+"
+CADENA_MINUSCULAS = "[a-z]+"
